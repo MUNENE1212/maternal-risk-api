@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 class AlertBase(BaseModel):
-    mother_id: int
+    national_id: int
     pregnancy_id: str
     alert_type: str  # SMS, App, Emergency
     alert_priority: str  # Normal, Urgent, Emergency

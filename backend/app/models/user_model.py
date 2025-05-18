@@ -1,21 +1,22 @@
 # app/models/user_model.py
 
 from pydantic import BaseModel, EmailStr
-from typing import Optional
 from datetime import datetime
+from typing import Literal, Optional
 
-class UserBase(BaseModel):
-    name: str
-    email: EmailStr
-    role: str  # e.g., "admin", "health_worker", "analyst"
+class UserCreate(BaseModel):
+    full_name: str
+    phone_number: str  # Use this instead of email
+    password: str
+    role: str
 
-class UserCreate(UserBase):
+class UserLogin(BaseModel):
+    phone_number: str
     password: str
 
-class UserOut(UserBase):
+class UserOut(BaseModel):
     id: str
-    created_at: datetime
-
-    class Config:
-        orm_mode = True
+    full_name: str
+    phone_number: str
+    role: str
 

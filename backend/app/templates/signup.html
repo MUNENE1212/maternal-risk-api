@@ -1,0 +1,24 @@
+<!-- templates/signup.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup</title>
+</head>
+<body>
+  <h2>Signup</h2>
+  <form method="POST" action="/auth/signup">
+    <label>Full Name: <input type="text" name="full_name" required></label><br>
+    <label>Email: <input type="email" name="email" required></label><br>
+    <label>Password: <input type="password" name="password" required></label><br>
+    <label>Role:
+      <select name="role">
+        <option value="patient">Patient</option>
+        <option value="chv">CHV</option>
+        <option value="clinician">Clinician</option>
+      </select>
+    </label><br>
+    <button type="submit">Signup</button>
+  </form>
+</body>
+</html>
+

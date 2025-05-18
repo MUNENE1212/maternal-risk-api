@@ -1,12 +1,17 @@
 # app/routers/patient_router.py
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from bson import ObjectId
+from app.middleware.rbac import require_role
 from app.models.patient_model import PatientCreate, PatientOut
 from app.db.database import patients_collection
 from datetime import datetime
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
+templates = Jinja2Templates(directory="app/templates")
 router = APIRouter(prefix="/patients", tags=["Patients"])
+
 def patient_helper(patient) -> dict:
     from datetime import datetime
 
@@ -98,3 +103,7 @@ async def delete_patient(id: str):
         raise HTTPException(status_code=404, detail="Patient not found")
     return {"message": "Patient deleted successfully"}
 
+
+@router.get("/dashboard", response_class=HTMLResponse)
+async def patient_dashboard(request: Request, user=Depends(require_role(["patient"]))):
+    return templates.TemplateResponse("home.html", {"request": request, "user": user})
