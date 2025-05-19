@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MamaWell Portal{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .sidebar-header {
+            background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%);
+        }
+        
+        .nav-link {
+            @apply flex items-center space-x-3 px-4 py-3 text-blue-100 rounded-lg transition-all;
+        }
+        
+        .nav-link:hover {
+            @apply bg-blue-700/50 text-white;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+    <div class="min-h-screen flex">
+        <!-- Enhanced Sidebar -->
+        <aside class="w-64 bg-blue-900 flex flex-col shadow-xl">
+            <div class="sidebar-header p-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center">
+                        <span class="text-blue-800 font-bold">MW</span>
+                    </div>
+                    <h1 class="text-white font-bold text-xl">MamaWell</h1>
+                </div>
+                <p class="text-blue-200 text-sm mt-2">Your Pregnancy Companion</p>
+            </div>
+
+            <nav class="p-4 flex-1 space-y-2">
+                <a href="/patients/dashboard" class="nav-link">
+                    <span>🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/patients/visuals" class="nav-link">
+                    <span>📊</span>
+                    <span>Health Analytics</span>
+                </a>
+                <a href="/patients/blogs" class="nav-link">
+                    <span>📖</span>
+                    <span>Education Hub</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-blue-800">
+                <a href="/auth/logout" class="nav-link">
+                    <span>🔒</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-6 py-8">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

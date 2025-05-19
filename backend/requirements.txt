@@ -1,0 +1,15 @@
+asgiref==3.8.1
+Django==5.2
+sqlparse==0.5.3
+uvicorn
+fastapi
+uvicorn
+pydantic
+numpy
+joblib
+pymongo
+motor
+imblearn
+python-decouple
+xgboost 
+
