@@ -12,6 +12,13 @@ app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:8000"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include patient routes
 app.include_router(patient_router.router)
@@ -31,13 +38,5 @@ from app.routers.patient_router import patient_dashboard
 @app.get("/dashboard", response_class=HTMLResponse)
 async def alias_dashboard(request: Request):
     return await patient_dashboard(request)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Or replace with your frontend URL for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 

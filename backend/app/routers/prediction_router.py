@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 from datetime import datetime
 import joblib, numpy as np, os
 from app.db.database import predictions_collection, patients_collection
@@ -23,17 +23,17 @@ label_encoder = joblib.load(ENCODER_PATH)
 
 # Define input model
 class PredictionInput(BaseModel):
-    national_id: str
-    Age: int
-    SystolicBP: int
-    DiastolicBP: int
-    BS: float
-    BodyTemp: float
-    HeartRate: int
+    national_id: str = Field(..., min_length=3, example="123456789")
+    Age: int = Field(..., gt=10, lt=60, example=30)
+    SystolicBP: int = Field(..., ge=70, le=250, example=120)
+    DiastolicBP: int = Field(..., ge=40, le=150, example=80)
+    BS: float = Field(..., ge=1.0, le=30.0, example=5.6)
+    BodyTemp: float = Field(..., ge=35.0, le=42.0, example=36.6)
+    HeartRate: int = Field(..., ge=40, le=200, example=80)
 
 # Define response models
 class PredictionHistoryItem(BaseModel):
-    risk: str
+    prediction: str
     confidence: float
     model_used: str
     predicted_at: datetime

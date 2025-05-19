@@ -1,24 +1,968 @@
-<!-- templates/signup.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Signup</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MamaWell - Mother Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .dark-mode {
+            background-color: #1f2937;
+            color: #f3f4f6;
+        }
+        .dark-mode .bg-white {
+            background-color: #374151;
+        }
+        .dark-mode .bg-blue-600 {
+            background-color: #1e40af;
+        }
+        .dark-mode .text-gray-800 {
+            color: #d1d5db;
+        }
+        .dark-mode .bg-gray-50 {
+            background-color: #4b5563;
+            color: #f3f4f6;
+        }
+        .dark-mode .text-gray-600 {
+            color: #e5e7eb;
+        }
+        .dark-mode .text-gray-500 {
+            color: #d1d5db;
+        }
+        .dark-mode .bg-gray-100 {
+            background-color: #374151;
+        }
+        .dark-mode .bg-pink-50 {
+            background-color: #500724;
+        }
+        .dark-mode .text-pink-600 {
+            color: #fb7185;
+        }
+        .dark-mode .bg-purple-50 {
+            background-color: #3b0764;
+        }
+        .dark-mode .bg-blue-50 {
+            background-color: #172554;
+        }
+        .dark-mode .bg-orange-50 {
+            background-color: #431407;
+        }
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav-link.active {
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #2563eb;
+            border-radius: 2px;
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.3s;
+            stroke-width: 5;
+            stroke-linecap: round;
+        }
+        .blog-card {
+            transition: transform 0.3s ease;
+        }
+        .blog-card:hover {
+            transform: translateY(-5px);
+        }
+        .community-tab {
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 0.5rem;
+        }
+        .community-tab.active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .community-content {
+            display: none;
+        }
+        .community-content.active {
+            display: block;
+        }
+    </style>
 </head>
-<body>
-  <h2>Signup</h2>
-  <form method="POST" action="/auth/signup">
-    <label>Full Name: <input type="text" name="full_name" required></label><br>
-    <label>Email: <input type="email" name="email" required></label><br>
-    <label>Password: <input type="password" name="password" required></label><br>
-    <label>Role:
-      <select name="role">
-        <option value="patient">Patient</option>
-        <option value="chv">CHV</option>
-        <option value="clinician">Clinician</option>
-      </select>
-    </label><br>
-    <button type="submit">Signup</button>
-  </form>
-</body>
-</html>
+<body class="bg-gray-100 text-gray-800">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto py-5 px-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-full">
+                    <i class="fas fa-baby text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">MamaWell</h1>
+                    <p class="text-sm">Your Pregnancy Companion</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center mr-4">
+                    <i class="fas fa-bell text-white mr-2"></i>
+                    <span class="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                </div>
+                <button id="darkModeToggle" class="bg-white text-blue-600 hover:bg-gray-200 px-4 py-2 rounded-full flex items-center transition duration-300">
+                    <i class="fas fa-moon mr-2"></i>
+                    <span>Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-6 py-3">
+            <ul class="flex space-x-8 overflow-x-auto">
+                <li><a href="#home" class="nav-link active text-blue-600 hover:text-blue-800 font-medium flex items-center"><i class="fas fa-home mr-2"></i> Home</a></li>
+                <li><a href="#community" class="nav-link text-blue-600 hover:text-blue-800 font-medium flex items-center"><i class="fas fa-users mr-2"></i> Community</a></li>
+                <li><a href="#profile-analytics" class="nav-link text-blue-600 hover:text-blue-800 font-medium flex items-center"><i class="fas fa-chart-line mr-2"></i> Profile & Analytics</a></li>
+                <li><a href="#health-timeline" class="nav-link text-blue-600 hover:text-blue-800 font-medium flex items-center"><i class="fas fa-clock mr-2"></i> Health Timeline</a></li>
+                <li><a href="#education-hub" class="nav-link text-blue-600 hover:text-blue-800 font-medium flex items-center"><i class="fas fa-book-open mr-2"></i> Education Hub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 px-6">
+        <!-- Home View -->
+        <section id="home" class="view active">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Welcome, Sarah! <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">28 Weeks</span></h2>
+                <div class="flex items-center">
+                    <span class="text-gray-500 mr-2">Updated 2 hours ago</span>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full transition duration-300 flex items-center">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Week Progress -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Pregnancy Progress</h3>
+                        <div class="bg-gray-200 h-4 rounded-full w-full mb-4">
+                            <div class="bg-gradient-to-r from-blue-500 to-pink-500 h-4 rounded-full" style="width: 70%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>First Trimester</span>
+                            <span>Second Trimester</span>
+                            <span>Third Trimester</span>
+                        </div>
+                    </div>
+                    <div class="md:ml-8 mt-6 md:mt-0 flex flex-col items-center">
+                        <div class="relative w-32 h-32">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring__circle" stroke="#e2e8f0" cx="60" cy="60" r="54" fill="transparent"/>
+                                <circle class="progress-ring__circle" stroke="#3b82f6" cx="60" cy="60" r="54" fill="transparent" stroke-dasharray="339.3" stroke-dashoffset="101.8"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-3xl font-bold text-blue-600">28</span>
+                                <span class="text-gray-500 text-sm">out of 40 weeks</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 font-medium mt-2">12 weeks to go!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-pink-50 rounded-xl p-6 shadow-md transition duration-300 hover:shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-pink-600">Next Appointment</h3>
+                        <i class="fas fa-calendar-alt text-pink-500 text-xl"></i>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="bg-pink-200 rounded-full p-3 mr-4">
+                            <span class="text-xl font-bold text-pink-700">15</span>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 font-medium">June 15, 2024</p>
+                            <p class="text-gray-500">Dr. Mwangi Clinic</p>
+                        </div>
+                    </div>
+                    <button class="mt-4 bg-white text-pink-600 border border-pink-200 hover:bg-pink-100 px-4 py-2 rounded-lg w-full transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-video mr-2"></i> Schedule Video Call
+                    </button>
+                </div>
+                
+                <div class="bg-purple-50 rounded-xl p-6 shadow-md transition duration-300 hover:shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-purple-600">Weight Tracking</h3>
+                        <i class="fas fa-weight text-purple-500 text-xl"></i>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="bg-purple-200 rounded-full p-3 mr-4">
+                            <i class="fas fa-arrow-up text-purple-700"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 font-medium">68.5 kg</p>
+                            <p class="text-gray-500">+1.2kg from last month</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 h-12 flex items-end">
+                        <div class="h-6 bg-purple-200 rounded-sm w-1/5 mx-0.5"></div>
+                        <div class="h-8 bg-purple-300 rounded-sm w-1/5 mx-0.5"></div>
+                        <div class="h-7 bg-purple-300 rounded-sm w-1/5 mx-0.5"></div>
+                        <div class="h-9 bg-purple-400 rounded-sm w-1/5 mx-0.5"></div>
+                        <div class="h-12 bg-purple-500 rounded-sm w-1/5 mx-0.5"></div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 rounded-xl p-6 shadow-md transition duration-300 hover:shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-blue-600">Blood Pressure</h3>
+                        <i class="fas fa-heartbeat text-blue-500 text-xl"></i>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="bg-blue-200 rounded-full p-3 mr-4">
+                            <i class="fas fa-check text-blue-700"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 font-medium">120/80 mmHg</p>
+                            <p class="text-gray-500">Normal Range</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 bg-gray-200 h-2 rounded-full">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: 60%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Low</span>
+                        <span>Normal</span>
+                        <span>High</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Development and Tips -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-baby text-orange-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Weekly Development</h3>
+                    </div>
+                    <div class="flex items-start mt-4">
+                        <div class="flex-shrink-0 mt-1">
+                            <img src="/api/placeholder/150/150" alt="Baby Development" class="rounded-lg">
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold text-gray-700">Week 28: Hearing Develops</h4>
+                            <p class="text-gray-600 mt-2">Your baby can now recognize your voice! The baby is about the size of an eggplant, weighing approximately 1kg and is about 37cm long.</p>
+                            <ul class="mt-3 space-y-2">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    <span class="text-gray-600">Brain development is accelerating</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    <span class="text-gray-600">Eyes can open and close</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    <span class="text-gray-600">Developing sleep patterns</span>
+                                </li>
+                            </ul>
+                            <button class="mt-4 bg-orange-50 text-orange-600 hover:bg-orange-100 px-4 py-2 rounded-lg transition duration-300">
+                                Learn More About Week 28
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-leaf text-green-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Health Tips</h3>
+                    </div>
+                    <div class="space-y-4 mt-2">
+                        <div class="flex items-start p-3 bg-green-50 rounded-lg">
+                            <i class="fas fa-tint text-blue-500 text-xl mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">Stay Hydrated</h4>
+                                <p class="text-gray-600">Drink at least 8-10 glasses of water daily to maintain amniotic fluid and support blood volume.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-3 bg-purple-50 rounded-lg">
+                            <i class="fas fa-walking text-purple-500 text-xl mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">Keep Moving</h4>
+                                <p class="text-gray-600">Light exercise like walking can help reduce swelling and improve sleep quality.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-3 bg-red-50 rounded-lg">
+                            <i class="fas fa-apple-alt text-red-500 text-xl mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">Iron-Rich Foods</h4>
+                                <p class="text-gray-600">Include spinach, beans, and lean meats in your diet to prevent anemia during pregnancy.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="mt-4 w-full bg-green-50 text-green-600 hover:bg-green-100 px-4 py-2 rounded-lg transition duration-300">
+                        View All Health Tips
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community View -->
+        <section id="community" class="view">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Community Hub</h2>
+                <p class="text-gray-600">Connect with other mothers and healthcare professionals</p>
+            </div>
+
+            <!-- Community Navigation Tabs -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <div class="community-tab active font-medium text-gray-800 mr-8 flex items-center" data-tab="personalized">
+                    <i class="fas fa-star text-yellow-500 mr-2"></i> For You
+                </div>
+                <div class="community-tab font-medium text-gray-800 mr-8 flex items-center" data-tab="blogs">
+                    <i class="fas fa-blog text-blue-500 mr-2"></i> Blog Posts
+                </div>
+                <div class="community-tab font-medium text-gray-800 mr-8 flex items-center" data-tab="discussions">
+                    <i class="fas fa-comments text-green-500 mr-2"></i> Discussions
+                </div>
+            </div>
+
+            <!-- Personalized Content Tab -->
+            <div id="personalized-content" class="community-content active">
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-md mb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-brain text-blue-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Personalized Wellbeing Tips</h3>
+                    </div>
+                    <div class="bg-white rounded-lg p-5">
+                        <h4 class="font-medium text-gray-800 mb-2">Third Trimester Exercise Guide</h4>
+                        <p class="text-gray-600">Based on your 28th week, try gentle prenatal yoga to ease back pain. Focus on cat-cow poses and gentle stretching.</p>
+                        <div class="flex items-center mt-3">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">AI Generated</span>
+                            <span class="text-gray-500 text-sm ml-auto">Tailored for your stage</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="bg-white rounded-lg p-5">
+                            <h4 class="font-medium text-gray-800 mb-2">Nutrition Recommendation</h4>
+                            <p class="text-gray-600">Increase calcium intake with dairy or fortified plant milk to support your baby's bone development.</p>
+                            <div class="flex items-center mt-3">
+                                <div class="flex">
+                                    <i class="fas fa-utensils text-orange-500 mr-1"></i>
+                                    <span class="text-xs text-gray-500">Dietary</span>
+                                </div>
+                                <i class="fas fa-bookmark text-blue-500 ml-auto cursor-pointer"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-5">
+                            <h4 class="font-medium text-gray-800 mb-2">Sleep Position Tip</h4>
+                            <p class="text-gray-600">Try sleeping on your left side with a pregnancy pillow to improve blood circulation.</p>
+                            <div class="flex items-center mt-3">
+                                <div class="flex">
+                                    <i class="fas fa-bed text-indigo-500 mr-1"></i>
+                                    <span class="text-xs text-gray-500">Rest</span>
+                                </div>
+                                <i class="fas fa-bookmark text-blue-500 ml-auto cursor-pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-sync-alt mr-2"></i> Get More Personalized Tips
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Mothers Similar To You</h3>
+                        <button class="text-blue-600 hover:text-blue-800">See All</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4 flex items-center">
+                            <img src="/api/placeholder/60/60" alt="User Avatar" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <p class="text-gray-700 font-medium">Jane W.</p>
+                                <p class="text-gray-500 text-sm">27 weeks • Nairobi</p>
+                            </div>
+                            <button class="ml-auto bg-blue-100 text-blue-600 hover:bg-blue-200 p-2 rounded-full">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 flex items-center">
+                            <img src="/api/placeholder/60/60" alt="User Avatar" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <p class="text-gray-700 font-medium">Lisa M.</p>
+                                <p class="text-gray-500 text-sm">29 weeks • Mombasa</p>
+                            </div>
+                            <button class="ml-auto bg-blue-100 text-blue-600 hover:bg-blue-200 p-2 rounded-full">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 flex items-center">
+                            <img src="/api/placeholder/60/60" alt="User Avatar" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <p class="text-gray-700 font-medium">Anne K.</p>
+                                <p class="text-gray-500 text-sm">28 weeks • Kisumu</p>
+                            </div>
+                            <button class="ml-auto bg-blue-100 text-blue-600 hover:bg-blue-200 p-2 rounded-full">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blogs Tab -->
+            <div id="blogs-content" class="community-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Featured Blog Posts</h3>
+                    <div class="flex">
+                        <div class="relative">
+                            <input type="text" placeholder="Search blogs..." class="border border-gray-300 rounded-full px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                        <select class="ml-4 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>Most Recent</option>
+                            <option>Most Popular</option>
+                            <option>By Clinicians</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl overflow-hidden shadow-md transition-all duration-300 blog-card">
+                        <img src="/api/placeholder/400/200" alt="Blog Image" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <div class="flex items-center mb-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Nutrition</span>
+                                <span class="text-gray-500 text-sm ml-auto">May 15, 2025</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 text-lg mb-2">Essential Nutrients for Third Trimester</h4>
+                            <p class="text-gray-600 mb-4">Discover the key vitamins and minerals you need to support your baby's final growth stage.</p>
+                            <div class="flex items-center">
+                                <img src="/api/placeholder/40/40" alt="Author" class="w-8 h-8 rounded-full mr-2">
+                                <span class="text-gray-700 text-sm">Dr. Wangari N. • Nutritionist</span>
+                                <div class="ml-auto flex space-x-2">
+                                    <i class="far fa-heart text-gray-400 hover:text-red-500 cursor-pointer"></i>
+                                    <i class="far fa-bookmark text-gray-400 hover:text-blue-500 cursor-pointer"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl overflow-hidden shadow-md transition-all duration-300 blog-card">
+                        <img src="/api/placeholder/400/200" alt="Blog Image" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <div class="flex items-center mb-2">
+                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Exercise</span>
+                                <span class="text-gray-500 text-sm ml-auto">May 10, 2025</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 text-lg mb-2">Safe Exercises for Your Third Trimester</h4>
+                            <p class="text-gray-600 mb-4">Stay active with these gentle workouts designed specifically for weeks 28-40.</p>
+                            <div class="flex items-center">
+                                <img src="/api/placeholder/40/40" alt="Author" class="w-8 h-8 rounded-full mr-2">
+                                <span class="text-gray-700 text-sm">Jessica O. • Prenatal Fitness</span>
+                                <div class="ml-auto flex space-x-2">
+                                    <i class="far fa-heart text-gray-400 hover:text-red-500 cursor-pointer"></i>
+                                    <i class="far fa-bookmark text-gray-400 hover:text-blue-500 cursor-pointer"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Articles</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow flex items-start">
+                            <img src="/api/placeholder/120/120" alt="Article Thumbnail" class="w-24 h-24 rounded object-cover">
+                            <div class="ml-4 flex-1">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-medium text-gray-800">Preparing Your Hospital Bag: A Comprehensive Checklist</h4>
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Popular</span>
+                                </div>
+                                <p class="text-gray-600 my-2 line-clamp-2">Make sure you're ready for the big day with this essential packing guide for your hospital stay.</p>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500 text-sm">May 8, 2025 • 5 min read</span>
+                                    <div class="flex space-x-3">
+                                        <span class="text-gray-500 text-sm flex items-center"><i class="far fa-eye mr-1"></i> 1.2K</span>
+                                        <span class="text-gray-500 text-sm flex items-center"><i class="far fa-comment mr-1"></i> 24</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-lg shadow flex items-start">
+                            <img src="/api/placeholder/120/120" alt="Article Thumbnail" class="w-24 h-24 rounded object-cover">
+                            <div class="ml-4 flex-1">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-medium text-gray-800">Managing Swelling in the Third Trimester</h4>
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">New</span>
+                                </div>
+                                <p class="text-gray-600 my-2 line-clamp-2">From elevating your feet to dietary changes, discover effective ways to reduce pregnancy swelling.</p>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500 text-sm">May 5, 2025 • 3 min read</span>
+                                    <div class="flex space-x-3">
+                                        <span class="text-gray-500 text-sm flex items-center"><i class="far fa-eye mr-1"></i> 856</span>
+                                        <span class="text-gray-500 text-sm flex items-center"><i class="far fa-comment mr-1"></i> 12</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-center">
+                        <button class="bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg transition duration-300 flex items-center">
+                            <span>View More Articles</span>
+                            <i class="fas fa-chevron-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discussions Tab -->
+            <div id="discussions-content" class="community-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Community Discussions</h3>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center">
+                        <i class="fas fa-plus mr-2"></i> New Post
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center">
+                            <img src="/api/placeholder/50/50" alt="User Avatar" class="w-10 h-10 rounded-full mr-4">
+                            <div>
+                                <p class="text-gray-700 font-medium">Maria K.</p>
+                                <p class="text-gray-500 text-sm">Mother • 2 hours ago</p>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Trending</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h4 class="font-medium text-gray-800 text-lg">Any tips for dealing with morning sickness that won't go away?</h4>
+                            <p class="text-gray-600 mt-2">I'm at week 30 and still experiencing morning sickness. My doctor says it can be normal but I'm looking for relief strategies that worked for other moms. I've tried ginger tea but need more ideas! 🤢</p>
+                        </div>
+                        <div class="mt-4 flex items-center space-x-4">
+                            <button class="text-gray-500 hover:text-blue-600 flex items-center">
+                                <i class="far fa-thumbs-up mr-1"></i> 
+                                <span>24 Likes</span>
+                            </button>
+                            <button class="text-gray-500 hover:text-blue-600 flex items-center">
+                                <i class="far fa-comment mr-1"></i> 
+                                <span>8 Comments</span>
+                            </button>
+                            <button class="text-gray-500 hover:text-blue-600 flex items-center">
+                                <i class="fas fa-user-md mr-1"></i> 
+                                <span>Tag Clinician</span>
+                            </button>
+                            <button class="text-gray-500 hover:text-blue-600 flex items-center ml-auto">
+                                <i class="far fa-bookmark mr-1"></i> 
+                                <span>Save</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Comments Section -->
+                    <div class="bg-gray-50 p-4">
+                        <h5 class="font-medium text-gray-700 mb-3">Top Comments</h5>
+                        
+                        <!-- Comment 1 -->
+                        <div class="bg-white rounded-lg p-4 mb-3">
+                            <div class="flex items-center">
+                                <img src="/api/placeholder/40/40" alt="Doctor Avatar" class="w-8 h-8 rounded-full mr-3">
+                                <div>
+                                    <div class="flex items-center">
+                                        <p class="text-gray-700 font-medium">Dr. Wangari</p>
+                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded ml-2">Verified Clinician</span>
+                                    </div>
+                                    <p class="text-gray-500 text-xs">Obstetrician • 1 hour ago</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mt-2">Try eating small, frequent meals throughout the day rather than large meals. Keeping something in your stomach helps. Also, vitamin B6 supplements may help - but discuss with your doctor first!</p>
+                            <div class="mt-2 flex space-x-4">
+                                <button class="text-gray-500 hover:text-blue-600 text-sm flex items-center">
+                                    <i class="far fa-thumbs-up mr-1"></i> 
+                                    <span>12</span>
+                                </button>
+                                <button class="text-gray-500 hover:text-blue-600 text-sm flex items-center">
+                                    <i class="far fa-comment mr-1"></i> 
+                                    <span>Reply</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Comment 2 -->
+                        <div class="bg-white rounded-lg p-4">
+                            <div class="flex items-center">
+                                <img src="/api/placeholder/40/40" alt="User Avatar" class="w-8 h-8 rounded-full mr-3">
+                                <div>
+                                    <p class="text-gray-700 font-medium">Jane N.</p>
+                                    <p class="text-gray-500 text-xs">Mother of 2 • 30 min ago</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mt-2">I had this too! What helped me was wearing acupressure wristbands and avoiding strong smells. Also cold foods like fruit popsicles were easier to keep down than hot meals.</p>
+                            <div class="mt-2 flex space-x-4">
+                                <button class="text-gray-500 hover:text-blue-600 text-sm flex items-center">
+                                    <i class="far fa-thumbs-up mr-1"></i> 
+                                    <span>8</span>
+                                </button>
+                                <button class="text-gray-500 hover:text-blue-600 text-sm flex items-center">
+                                    <i class="far fa-comment mr-1"></i> 
+                                    <span>Reply</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Comment -->
+                        <div class="mt-4 flex">
+                            <img src="/api/placeholder/40/40" alt="Your Avatar" class="w-8 h-8 rounded-full mr-3">
+                            <div class="flex-1">
+                                <input type="text" placeholder="Write a comment..." class="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- More Community Posts -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <img src="/api/placeholder/40/40" alt="User Avatar" class="w-10 h-10 rounded-full mr-4">
+                            <div>
+                                <p class="text-gray-700 font-medium">Rebecca O.</p>
+                                <p class="text-gray-500 text-sm">First-time mom • 5 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="text-gray-600">Looking for recommendations for the best baby monitors that work well in Kenya. Preferably something with good battery life!</p>
+                        </div>
+                        <div class="mt-3 flex items-center space-x-4">
+                            <span class="text-gray-500 text-sm">15 Likes</span>
+                            <span class="text-gray-500 text-sm">4 Comments</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <img src="/api/placeholder/40/40" alt="User Avatar" class="w-10 h-10 rounded-full mr-4">
+                            <div>
+                                <p class="text-gray-700 font-medium">Sarah M.</p>
+                                <p class="text-gray-500 text-sm">Week 28 • Just now</p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="text-gray-600">Just had my glucose test done today. Waiting for results and feeling nervous. Anyone else recently gone through this?</p>
+                        </div>
+                        <div class="mt-3 flex items-center space-x-4">
+                            <span class="text-gray-500 text-sm">2 Likes</span>
+                            <span class="text-gray-500 text-sm">No Comments</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile & Analytics View -->
+        <section id="profile-analytics" class="view">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Profile & Analytics</h2>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center">
+                    <i class="fas fa-edit mr-2"></i> Update Profile
+                </button>
+            </div>
+            
+            <!-- Profile Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="flex flex-col md:flex-row">
+                    <div class="text-center md:text-left md:flex md:items-center">
+                        <div class="relative inline-block">
+                            <img src="/api/placeholder/120/120" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-blue-100">
+                            <span class="absolute bottom-0 right-0 bg-green-500 text-white rounded-full p-1">
+                                <i class="fas fa-camera"></i>
+                            </span>
+                        </div>
+                        <div class="mt-4 md:mt-0 md:ml-6">
+                            <h3 class="text-xl font-semibold text-gray-800">Sarah M.</h3>
+                            <p class="text-gray-600">sarah.m@example.com</p>
+                            <div class="mt-2 flex flex-wrap justify-center md:justify-start gap-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">28 Weeks</span>
+                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">First Pregnancy</span>
+                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Due: August 7, 2025</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 md:mt-0 md:ml-auto">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-medium text-gray-800">Profile Completion</h4>
+                                <span class="text-blue-600 font-semibold">85%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">Complete your medical history to unlock more personalized insights.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Details and Health Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-user text-blue-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Profile Details</h3>
+                        <button class="ml-auto text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Full Name:</span>
+                            <span class="text-gray-700 font-medium">Sarah Mwangi</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Age:</span>
+                            <span class="text-gray-700 font-medium">29 years</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Phone:</span>
+                            <span class="text-gray-700 font-medium">+254 700 123 456</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Location:</span>
+                            <span class="text-gray-700 font-medium">Nairobi, Kenya</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Emergency Contact:</span>
+                            <span class="text-gray-700 font-medium">John M. (Husband)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Blood Type:</span>
+                            <span class="text-gray-700 font-medium">O+</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-heartbeat text-green-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Health Summary</h3>
+                        <button class="ml-auto text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Blood Pressure:</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm">120/80 mmHg (Normal)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Weight:</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-sm">68.5 kg</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Heart Rate:</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm">72 bpm (Normal)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Blood Sugar:</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm">5.2 mmol/L (Normal)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Hemoglobin:</span>
+                            <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-sm">11.2 g/dL (Slightly Low)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Fundal Height:</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm">28 cm (On Track)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-purple-100 p-2 rounded-full mr-3">
+                            <i class="fas fa-weight text-purple-500"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Weight Trend</h3>
+                        <div class="ml-auto flex items-center space-x-2">
+                            <select class="text-sm border border-gray-300 rounded px-2 py-1">
+                                <option>Last 5 Weeks</option>
+                                <option>Last 3 Months</option>
+                                <option>All</option>
+                            </select>
+                            <button class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-expand-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <canvas id="weightChart" class="w-full h-64"></canvas>
+                    <div class="mt-4 flex justify-between text-sm text-gray-600">
+                        <div>
+                            <div class="flex items-center">
+                                <i class="fas fa-arrow-up text-green-500 mr-1"></i>
+                                <span>3.5 kg gained</span>
+                            </div>
+                            <div class="text-gray-500">Since start of trimester</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium">Healthy Range</div>
+                            <div class="text-gray-500">11-16 kg total for pregnancy</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-red-100 p-2 rounded-full mr-3">
+                            <i class="fas fa-heartbeat text-red-500"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Blood Pressure Trend</h3>
+                        <div class="ml-auto flex items-center space-x-2">
+                            <select class="text-sm border border-gray-300 rounded px-2 py-1">
+                                <option>Last 5 Weeks</option>
+                                <option>Last 3 Months</option>
+                                <option>All</option>
+                            </select>
+                            <button class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-expand-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <canvas id="bpChart" class="w-full h-64"></canvas>
+                    <div class="mt-4 flex justify-between text-sm text-gray-600">
+                        <div>
+                            <div class="flex items-center">
+                                <i class="fas fa-equals text-blue-500 mr-1"></i>
+                                <span>Stable readings</span>
+                            </div>
+                            <div class="text-gray-500">No concerning changes</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium">Healthy Range</div>
+                            <div class="text-gray-500">Below 140/90 mmHg</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Health Timeline View -->
+        <section id="health-timeline" class="view">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Health Timeline</h2>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Add Event
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="flex flex-col md:flex-row items-center mb-6">
+                    <div class="w-full md:w-auto mb-4 md:mb-0">
+                        <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg px-4 py-2 inline-block">
+                            <div class="text-sm">Current Week</div>
+                            <div class="text-3xl font-bold">28</div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full md:flex-1 md:ml-6">
+                        <div class="bg-gray-200 h-4 rounded-full overflow-hidden">
+                            <div class="bg-blue-600 h-4" style="width: 70%"></div>
+                        </div>
+                        <div class="flex justify-between mt-2 text-sm text-gray-600">
+                            <span>Week 1</span>
+                            <span>Week 20</span>
+                            <span>Week 40</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ml-auto mt-4 md:mt-0">
+                        <span class="bg-pink-100 text-pink-800 text-sm font-medium px-2.5 py-0.5 rounded-full">Due Date: August 7, 2025</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4 mb-4 overflow-x-auto pb-2">
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg">All Events</button>
+                    <button class="bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 rounded-lg">Check-ups</button>
+                    <button class="bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 rounded-lg">Tests</button>
+                    <button class="bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 rounded-lg">Symptoms</button>
+                    <button class="bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 rounded-lg">Milestones</button>
+                </div>
+            </div>
+            
+            <!-- Timeline -->
+            <div class="relative">
+                <!-- Vertical line -->
+                <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200 ml-1.5"></div>
+                
+                <!-- Timeline items -->
+                <div class="space-y-8">
+                    <!-- Timeline Item -->
+                    <div class="relative pl-12">
+                        <div class="flex items-center mb-1">
+                            <div class="absolute left-0 w-4 h-4 bg-blue-500 rounded-full"></div>
+                            <div class="absolute left-0 w-4 h-4 bg-blue-300 rounded-full animate-ping opacity-75"></div>
+                :text-blue-500 cursor-pointer"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl overflow-hidden shadow-md transition-all duration-300 blog-card">
+                        <img src="/api/placeholder/400/200" alt="Blog Image" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <div class="flex items-center mb-2">
+                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Sleep</span>
+                                <span class="text-gray-500 text-sm ml-auto">May 12, 2025</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 text-lg mb-2">Overcoming Third Trimester Sleep Challenges</h4>
+                            <p class="text-gray-600 mb-4">Practical tips to help you get better rest despite your growing baby bump and discomfort.</p>
+                            <div class="flex items-center">
+                                <img src="/api/placeholder/40/40" alt="Author" class="w-8 h-8 rounded-full mr-2">
+                                <span class="text-gray-700 text-sm">Maria J. • Sleep Specialist</span>
+                                <div class="ml-auto flex space-x-2">
+                                    <i class="far fa-heart text-gray-400 hover:text-red-500 cursor-pointer"></i>
+                                    <i class="far fa-bookmark text-gray-400 hover

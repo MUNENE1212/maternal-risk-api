@@ -41,8 +41,8 @@ def patient_helper(patient) -> dict:
 
     return {
         "id": str(patient["_id"]),
-        "national_id": str(patient.get("national_id", patient["_id"])),
-        "full_name": patient.get("full_name", ""),
+        "national_id": str(patient["_id"]),  # Changed from national_id to nationalId
+        "full_name": patient.get("full_name", ""),  # camelCase
         "phone_primary": patient.get("phone_primary", ""),
         "vitals_history": patient.get("vitals_history", []),
         "prediction_history": normalized_history,
@@ -106,4 +106,4 @@ async def delete_patient(id: str):
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def patient_dashboard(request: Request, user=Depends(require_role(["patient"]))):
-    return templates.TemplateResponse("home.html", {"request": request, "user": user})
+    return templates.TemplateResponse("mother_dashboard.html", {"request": request, "user": user})

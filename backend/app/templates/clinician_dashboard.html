@@ -770,6 +770,42 @@
                     </table>
                 </div>
             </div>
+                <!-- Add Patient Modal -->
+    <div id="add-patient-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Patient</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="add-patient-form">
+                <div class="form-group">
+                    <label for="new-national-id">National ID</label>
+                    <input type="text" id="new-national-id" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-first-name">First Name</label>
+                    <input type="text" id="new-first-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-last-name">Last Name</label>
+                    <input type="text" id="new-last-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-age">Age</label>
+                    <input type="number" id="new-age" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-phone">Phone Number</label>
+                    <input type="tel" id="new-phone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-address">Address</label>
+                    <textarea id="new-address" class="form-control" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Patient</button>
+            </form>
+        </div>
+    </div>
 
             <!-- Risk Assessment View -->
             <div id="vitals-view" class="view">
@@ -899,139 +935,493 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const API_BASE = 'http://localhost:8000';
-            let currentView = 'dashboard-view';
-
-            // Dark Mode Toggle
-            document.getElementById('theme-switch').addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-            });
-
-            // Initialize theme
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') document.body.classList.add('dark-mode');
-
-            // Navigation
-            const navItems = document.querySelectorAll('.nav-item');
-            const views = document.querySelectorAll('.view');
+       // Main JavaScript for MamaRisk Dashboard
+document.addEventListener('DOMContentLoaded', () => {
+    // Configuration
+    const API_BASE = 'http://localhost:8000'; // Ensure this matches your backend server
+    
+    // DOM Elements
+    const addPatientBtn = document.getElementById('add-patient-btn');
+    const addPatientModal = document.getElementById('add-patient-modal');
+    const addPatientForm = document.getElementById('add-patient-form');
+    const riskAssessmentForm = document.getElementById('risk-assessment-form');
+    const riskResult = document.getElementById('risk-result');
+    const searchBtn = document.getElementById('search-btn');
+    const patientSearch = document.getElementById('patient-search');
+    const closeButtons = document.querySelectorAll('.close');
+    const refreshStatsBtn = document.getElementById('refresh-stats');
+    
+    let currentView = 'dashboard-view';
+    
+    // ============ Error / Success Handling ============
+    
+    function showAlert(message, type = 'info') {
+        // Create alert element
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        
+        // Add to page
+        document.querySelector('.main-content').prepend(alertDiv);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            alertDiv.style.opacity = '0';
+            setTimeout(() => alertDiv.remove(), 300);
+        }, 5000);
+    }
+    
+    // ============ Navigation ============
+    
+    // Navigation between views
+    const navItems = document.querySelectorAll('.nav-item');
+    const views = document.querySelectorAll('.view');
+    
+    function showView(viewId) {
+        views.forEach(view => view.classList.remove('active'));
+        navItems.forEach(item => item.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        document.querySelector(`[data-view="${viewId}"]`).classList.add('active');
+        currentView = viewId;
+        
+        // Load data based on the view
+        if (viewId === 'patients-view') {
+            fetchPatients();
+        } else if (viewId === 'dashboard-view') {
+            fetchDashboardStats();
+            fetchRecentAssessments();
+        }
+    }
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const viewId = item.dataset.view;
+            if(viewId !== currentView) showView(viewId);
+        });
+    });
+    
+    // Dark Mode Toggle
+    document.getElementById('theme-switch').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+    
+    // Initialize theme from local storage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+    
+    // Mobile Menu Toggle
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('toggle-menu').addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+    
+    // Close modals
+    closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) modal.style.display = 'none';
+        });
+    });
+    
+    // ============ Dashboard Functions ============
+    
+    async function fetchDashboardStats() {
+        try {
+            // In a real app, you would fetch this from an API endpoint
+            // For now we'll use the static data
+            document.getElementById('total-cases').textContent = '254';
+            document.getElementById('high-risk').textContent = '37';
+            document.getElementById('medium-risk').textContent = '68';
+            document.getElementById('low-risk').textContent = '149';
             
-            function showView(viewId) {
-                views.forEach(view => view.classList.remove('active'));
-                navItems.forEach(item => item.classList.remove('active'));
-                document.getElementById(viewId).classList.add('active');
-                document.querySelector(`[data-view="${viewId}"]`).classList.add('active');
-                currentView = viewId;
-                sidebar.classList.remove('active');
+            // Initialize charts
+            initRiskChart();
+            initWeeklyAssessmentsChart();
+            
+        } catch (error) {
+            showAlert('Failed to load dashboard statistics', 'danger');
+            console.error('Dashboard stats error:', error);
+        }
+    }
+    
+    // Initialize Risk Distribution Chart
+    function initRiskChart() {
+        const ctx = document.getElementById('riskChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                datasets: [{
+                    data: [149, 68, 37],
+                    backgroundColor: [
+                        '#2a9d8f', // Low - Success
+                        '#e9c46a', // Medium - Warning
+                        '#e63946'  // High - Danger
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
             }
-
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const viewId = item.dataset.view;
-                    if(viewId !== currentView) showView(viewId);
+        });
+    }
+    
+    // Initialize Weekly Assessments Chart
+    function initWeeklyAssessmentsChart() {
+        const ctx = document.getElementById('weeklyAssessmentsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Assessments',
+                    data: [12, 9, 15, 8, 11, 7, 4],
+                    backgroundColor: '#5B82C1',
+                    borderWidth: 1,
+                    barThickness: 20,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Fetch Recent Risk Assessments for Dashboard
+    async function fetchRecentAssessments() {
+        try {
+            // In production, you would fetch from an API endpoint
+            // For now, we'll use mock data
+            const mockData = [
+                { id: '123', national_id: '1234567890', name: 'Jane Doe', date: '2025-05-15', risk: 'High' },
+                { id: '124', national_id: '2345678901', name: 'Mary Smith', date: '2025-05-14', risk: 'Low' },
+                { id: '125', national_id: '3456789012', name: 'Susan Johnson', date: '2025-05-13', risk: 'Medium' }
+            ];
+            
+            const tbody = document.getElementById('recent-assessments-body');
+            tbody.innerHTML = mockData.map(assessment => `
+                <tr>
+                    <td>${assessment.national_id}</td>
+                    <td>${assessment.name}</td>
+                    <td>${assessment.date}</td>
+                    <td><span class="risk-${assessment.risk.toLowerCase()}">${assessment.risk}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary view-assessment" data-id="${assessment.id}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+        } catch (error) {
+            showAlert('Failed to load recent assessments', 'danger');
+            console.error('Recent assessments error:', error);
+        }
+    }
+    
+    // ============ Patient Management ============
+    
+    // Open Add Patient Modal
+    if (addPatientBtn) {
+        addPatientBtn.addEventListener('click', () => {
+            addPatientModal.style.display = 'block';
+        });
+    }
+    
+    // Add Patient Form Submission
+    if (addPatientForm) {
+        addPatientForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const patientData = {
+                    national_id: document.getElementById('new-national-id').value,
+                    full_name: `${document.getElementById('new-first-name').value} ${document.getElementById('new-last-name').value}`,
+                    age: parseInt(document.getElementById('new-age').value),
+                    phone_primary: document.getElementById('new-phone').value,
+                    address: document.getElementById('new-address').value
+                };
+                
+                const response = await fetch(`${API_BASE}/patients/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(patientData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to add patient');
+                }
+                
+                showAlert('Patient added successfully', 'success');
+                addPatientModal.style.display = 'none';
+                addPatientForm.reset();
+                fetchPatients();
+                
+            } catch (error) {
+                showAlert(error.message, 'danger');
+                console.error('Add patient error:', error);
+            }
+        });
+    }
+    
+    // Fetch Patients List
+    async function fetchPatients() {
+        try {
+            const response = await fetch(`${API_BASE}/patients/`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch patients data');
+            }
+            
+            const patients = await response.json();
+            const tbody = document.getElementById('patients-table-body');
+            
+            if (!tbody) {
+                console.error('Patients table body element not found');
+                return;
+            }
+            
+            tbody.innerHTML = patients.map(patient => {
+                // Calculate risk level from latest prediction if available
+                let riskLevel = 'Unknown';
+                if (patient.prediction_history && patient.prediction_history.length) {
+                    const latestPrediction = patient.prediction_history[patient.prediction_history.length - 1];
+                    riskLevel = latestPrediction.risk || 'Unknown';
+                }
+                
+                // Format date or use placeholder
+                const lastVisit = patient.updated_at ? new Date(patient.updated_at).toLocaleDateString() : 'Never';
+                
+                return `
+                    <tr>
+                        <td>${patient.national_id}</td>
+                        <td>${patient.full_name}</td>
+                        <td>${patient.age || 'N/A'}</td>
+                        <td>${patient.phone_primary || 'N/A'}</td>
+                        <td>${lastVisit}</td>
+                        <td><span class="risk-${riskLevel.toLowerCase()}">${riskLevel}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary view-btn" data-id="${patient.id}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-success edit-btn" data-id="${patient.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger delete-btn" data-id="${patient.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (confirm('Are you sure you want to delete this patient?')) {
+                        try {
+                            const response = await fetch(`${API_BASE}/patients/${btn.dataset.id}`, { 
+                                method: 'DELETE' 
+                            });
+                            
+                            if (!response.ok) {
+                                throw new Error('Failed to delete patient');
+                            }
+                            
+                            showAlert('Patient deleted successfully', 'success');
+                            fetchPatients();
+                        } catch (error) {
+                            showAlert(error.message, 'danger');
+                            console.error('Delete patient error:', error);
+                        }
+                    }
                 });
             });
-
-            // Mobile Menu Toggle
-            document.getElementById('toggle-menu').addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-            });
-
-            // Patient Management
-            async function fetchPatients() {
-                try {
-                    const response = await fetch(`${API_BASE}/patients`);
-                    const patients = await response.json();
-                    
-                    const tbody = document.getElementById('patients-table-body');
-                    tbody.innerHTML = patients.map(patient => `
-                        <tr>
-                            <td>${patient.nationalId}</td>
-                            <td>${patient.name}</td>
-                            <td>${patient.age}</td>
-                            <td>${patient.contact}</td>
-                            <td>${new Date(patient.lastVisit).toLocaleDateString()}</td>
-                            <td><span class="risk-${patient.riskLevel.toLowerCase()}">${patient.riskLevel}</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn btn-primary view-btn" data-id="${patient.id}"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-success edit-btn" data-id="${patient.id}"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger delete-btn" data-id="${patient.id}"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    `).join('');
-
-                    document.querySelectorAll('.delete-btn').forEach(btn => {
-                        btn.addEventListener('click', async () => {
-                            if (confirm('Delete patient?')) {
-                                await fetch(`${API_BASE}/patients/${btn.dataset.id}`, { method: 'DELETE' });
-                                fetchPatients();
-                            }
-                        });
-                    });
-                } catch (error) {
-                    showAlert('Failed to load patients', 'danger');
-                }
-            }
-
-            // Risk Assessment
-            const formInputs = {
-                nationalId: document.getElementById('national-id'),
-                age: document.getElementById('age'),
-                systolicBP: document.getElementById('systolic-bp'),
-                diastolicBP: document.getElementById('diastolic-bp'),
-                bloodSugar: document.getElementById('blood-sugar'),
-                bodyTemp: document.getElementById('body-temp'),
-                heartRate: document.getElementById('heart-rate')
-            };
-
-            document.getElementById('risk-assessment-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+        } catch (error) {
+            showAlert('Failed to load patients data', 'danger');
+            console.error('Fetch patients error:', error);
+        }
+    }
+    
+    // Patient Search
+    if (searchBtn && patientSearch) {
+        searchBtn.addEventListener('click', () => {
+            const searchTerm = patientSearch.value.toLowerCase();
+            const rows = document.querySelectorAll('#patients-table-body tr');
+            
+            rows.forEach(row => {
+                const id = row.querySelector('td:first-child').textContent.toLowerCase();
+                const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
                 
-                try {
-                    const values = {
-                        national_id: formInputs.nationalId.value.trim(),
-                        Age: parseInt(formInputs.age.value),
-                        SystolicBP: parseInt(formInputs.systolicBP.value),
-                        DiastolicBP: parseInt(formInputs.diastolicBP.value),
-                        BS: parseFloat(formInputs.bloodSugar.value),
-                        BodyTemp: parseFloat(formInputs.bodyTemp.value),
-                        HeartRate: parseInt(formInputs.heartRate.value)
-                    };
-
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
-
-                    const response = await fetch(`${API_BASE}/predict/`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(values)
-                    });
-
-                    if (!response.ok) throw new Error('Prediction failed');
-                    const result = await response.json();
-                    
-                    document.getElementById('risk-result').style.display = 'block';
-                    document.getElementById('result-risk-level').textContent = result.riskLevel;
-                    document.getElementById('result-confidence').textContent = `${result.confidence}%`;
-                    window.scrollTo({ top: document.getElementById('risk-result').offsetTop - 20, behavior: 'smooth' });
-
-                } catch (error) {
-                    showAlert(error.message, 'danger');
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-calculator"></i> Predict Risk';
+                if (id.includes(searchTerm) || name.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
                 }
             });
-
-            // Initialize
-            fetchPatients();
-            showView('dashboard-view');
         });
+    }
+    
+    // Update community view JavaScript
+    async function loadCommunityPosts() {
+      try {
+          const response = await fetch('/api/community/posts');
+          const posts = await response.json();
+          renderPosts(posts);
+    }     catch (error) {
+        showError('Failed to load community posts');
+    }
+}
+
+    async function submitPost(postData) {
+        try {
+            const response = await fetch('/api/community/posts', {
+             method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(postData)
+        });
+            if (!response.ok) throw new Error('Post failed');
+        loadCommunityPosts();
+    }       catch (error) {
+        showError(error.message);
+    }
+}
+    // Add to both dashboard scripts
+  function setupCommunity() {
+    // Shared event listeners
+      document.getElementById('new-post-btn').addEventListener('click', showPostModal);
+      document.querySelectorAll('.comment-form').forEach(form => {
+        form.addEventListener('submit', handleCommentSubmit);
+    });
+    
+    // Initial load
+      loadCommunityPosts();
+}
+    // ============ Risk Assessment ============
+    
+    // Risk Assessment Form Submission
+    if (riskAssessmentForm) {
+        riskAssessmentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            try {
+                // Get form values - ensure ID attributes match your HTML
+                const values = {
+                    national_id: document.getElementById('national-id').value.trim(),
+                    Age: parseInt(document.getElementById('age').value),
+                    SystolicBP: parseInt(document.getElementById('systolic-bp').value),
+                    DiastolicBP: parseInt(document.getElementById('diastolic-bp').value),
+                    BS: parseFloat(document.getElementById('blood-sugar').value),
+                    BodyTemp: parseFloat(document.getElementById('body-temp').value),
+                    HeartRate: parseInt(document.getElementById('heart-rate').value)
+                };
+                
+                // Validate input
+                for (const [key, value] of Object.entries(values)) {
+                    if (key !== 'national_id' && (isNaN(value) || value <= 0)) {
+                        throw new Error(`Invalid value for ${key}`);
+                    }
+                }
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                
+                const response = await fetch(`${API_BASE}/predict/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Risk assessment failed');
+                }
+                
+                const result = await response.json();
+                
+                // Display the result
+                riskResult.style.display = 'block';
+                riskResult.innerHTML = `
+                    <h3>Risk Assessment Result</h3>
+                    <div style="padding: 20px; text-align: center;">
+                        <h4>Risk Classification</h4>
+                        <div style="font-size: 2rem; margin: 20px 0; font-weight: bold;" class="risk-${result.prediction.toLowerCase()}">
+                            ${result.prediction}
+                        </div>
+                        <p>Confidence: ${result.confidence}%</p>
+                        <div class="action-buttons" style="justify-content: center; margin-top: 20px;">
+                            <button class="btn btn-primary" id="save-assessment">
+                                <i class="fas fa-save"></i> Save Assessment
+                            </button>
+                            <button class="btn btn-warning" id="new-assessment">
+                                <i class="fas fa-plus"></i> New Assessment
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Scroll to result
+                window.scrollTo({ top: riskResult.offsetTop - 20, behavior: 'smooth' });
+                
+                // Add event listener for new assessment button
+                document.getElementById('new-assessment').addEventListener('click', () => {
+                    riskAssessmentForm.reset();
+                    riskResult.style.display = 'none';
+                });
+                
+            } catch (error) {
+                showAlert(error.message, 'danger');
+                console.error('Risk assessment error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-calculator"></i> Predict Risk';
+            }
+        });
+    }
+    
+    // ============ Initialize the Dashboard ============
+    
+    // Start with Dashboard View
+    showView('dashboard-view');
+    
+    // Refresh stats on click
+    if (refreshStatsBtn) {
+        refreshStatsBtn.addEventListener('click', () => {
+            fetchDashboardStats();
+            fetchRecentAssessments();
+            showAlert('Dashboard statistics refreshed', 'success');
+        });
+    }
+});
     </script>
 </body>
 </html>

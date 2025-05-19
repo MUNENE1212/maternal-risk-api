@@ -11,7 +11,7 @@ router = APIRouter(prefix="/antenatal", tags=["Antenatal Visits"])
 class AntenatalVitals(BaseModel):
     national_id: str
     Age: int
-    SyststrcBP: int
+    SystolicBP: int
     DiastolicBP: int
     BS: float
     BodyTemp: float

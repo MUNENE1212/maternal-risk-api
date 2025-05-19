@@ -32,6 +32,9 @@ def normalize_phone(phone: str) -> str:
     # First strip all non-digits
     cleaned = re.sub(r'\D', '', phone)
     
+    # Log original and cleaned phone for debugging
+    logger.debug(f"Original phone: {phone}, Cleaned: {cleaned}")
+    
     # Handle different formats
     if cleaned.startswith('0'):
         return f'+254{cleaned[1:]}'
@@ -43,13 +46,16 @@ def normalize_phone(phone: str) -> str:
         # For any other format, ensure it has a + prefix
         return f'+{cleaned}' if not cleaned.startswith('+') else cleaned
 
+
 def validate_phone_format(phone: str) -> bool:
     """Validate that phone is in the correct +254XXXXXXXXX format"""
     return bool(re.fullmatch(r'^\+254\d{9}$', phone))
 
+
 @router.get('/favicon.ico', include_in_schema=False)
 async def favicon():
     return FileResponse("app/static/assets/favicon.ico")
+
 
 def show_login_error(request: Request, error: str):
     try:
@@ -65,6 +71,13 @@ def show_login_error(request: Request, error: str):
         logger.error(f"Error template rendering failed: {str(e)}")
         return HTMLResponse("<h1>Authentication Service Error</h1>", status_code=500)
 
+
+# auth_router.py
+def get_dashboard_url_by_role(role: str) -> str:
+    """All roles use the same dashboard endpoint"""
+    return "/dashboard"
+
+
 @router.post("/login", response_class=HTMLResponse)
 async def login_user_form(
     request: Request,
@@ -75,6 +88,9 @@ async def login_user_form(
     try:
         # Check if request is AJAX
         is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+        
+        # Log the original phone_number for debugging
+        logger.info(f"Original login phone: {phone_number}")
         
         # Normalize and validate phone number
         phone = normalize_phone(phone_number)
@@ -89,8 +105,22 @@ async def login_user_form(
 
         # Find user by phone
         user = await users_collection.find_one({"phone_number": phone})
+        
+        # Debug log if user not found
         if not user:
             logger.warning(f"User not found: {phone}")
+            # Try finding with alternative formats for debugging
+            alternative_formats = [
+                phone.replace('+', ''),
+                phone[1:] if phone.startswith('+') else phone,
+                phone[4:] if phone.startswith('+254') else phone
+            ]
+            logger.debug(f"Trying alternative formats: {alternative_formats}")
+            for alt_format in alternative_formats:
+                debug_user = await users_collection.find_one({"phone_number": alt_format})
+                if debug_user:
+                    logger.debug(f"Found user with alternative format: {alt_format}")
+            
             error_msg = "Account not found. Please check your phone number."
             if is_ajax:
                 return JSONResponse({"success": False, "message": error_msg}, status_code=400)
@@ -123,33 +153,40 @@ async def login_user_form(
             }
         )
 
+        # Get role-specific dashboard URL
+        user_role = user.get("role", "patient")
+        dashboard_url = get_dashboard_url_by_role(user_role)
+        logger.info(f"User {phone} with role {user_role} redirecting to {dashboard_url}")
+
         # Create token
         token_data = {
             "sub": user["phone_number"],
-            "role": user["role"],
+            "role": user_role,
             "id": str(user["_id"]),
             "name": user["full_name"]
         }
         token = create_access_token(token_data)
-        logger.info(f"Successful login for: {phone}")
+        logger.info(f"Successful login for: {phone} with role: {user_role}")
 
         # Handle response based on request type
         if is_ajax:
-            # For AJAX requests, return JSON
+            # For AJAX requests, return JSON with role-specific redirect
             return JSONResponse({
                 "success": True,
-                "redirect": "/patients/dashboard"
+                "redirect": dashboard_url,
+                "role": user_role
             })
         else:
-            # For form submissions, redirect with cookie
-            response = RedirectResponse(url="/patients/dashboard", status_code=302)
+            # For form submissions, redirect with cookie to role-specific dashboard
+            response = RedirectResponse(url=dashboard_url, status_code=302)
             response.set_cookie(
                 key="access_token",
                 value=token,
                 httponly=True,
-                secure=True,  # Set to False for HTTP testing environments
+                secure=False,  # Set to False for HTTP testing environments
                 samesite="Lax",
-                max_age=7 * 24 * 60 * 60  # 7 days
+                max_age=7 * 24 * 60 * 60,  # 7 day
+                path='/'
             )
             return response
 
@@ -189,12 +226,18 @@ async def signup_user_form(
         if not re.search(r'[A-Za-z]', password) or not re.search(r'\d', password):
             validation_errors.append("Password must contain both letters and numbers")
 
+        # Log the original phone number for debugging
+        logger.info(f"Original signup phone: {phone_number}")
+        
         # Normalize and validate phone
         try:
             normalized_phone = normalize_phone(phone_number)
+            logger.info(f"Normalized signup phone: {normalized_phone}")
+            
             if not validate_phone_format(normalized_phone):
                 validation_errors.append("Please enter a valid Kenyan phone number")
-        except Exception:
+        except Exception as e:
+            logger.error(f"Phone normalization error: {str(e)}")
             validation_errors.append("Invalid phone number format")
             normalized_phone = ""
             
@@ -231,6 +274,7 @@ async def signup_user_form(
             "failed_login_attempts": 0
         }
 
+        logger.info(f"Creating new user with phone: {normalized_phone}, role: {role.lower()}")
         result = await users_collection.insert_one(user_data)
         if not result.inserted_id:
             raise HTTPException(status_code=500, detail="Failed to create user")
@@ -284,7 +328,7 @@ async def show_login_page(request: Request):
         "request": request,
         "error": None,
         "news_posts": [
-            {"title": "Welcome to MamaWell", "snippet": "Track your pregnancy journey with ease"},
+            {"title": "Welcome to MamaGuardian", "snippet": "Track your pregnancy journey with ease"},
             {"title": "Prenatal Care", "snippet": "Regular checkups are essential for a healthy pregnancy"},
             {"title": "Nutrition Tips", "snippet": "Eat a balanced diet rich in folate and iron"}
         ]
@@ -294,5 +338,7 @@ async def show_login_page(request: Request):
 async def test_auth(current_user = Depends(get_current_user)):
     return JSONResponse({
         "status": "authenticated",
-        "user": current_user["phone_number"]
+        "user": current_user["phone_number"],
+        "role": current_user["role"],
+        "dashboard": get_dashboard_url_by_role(current_user["role"])
     })
