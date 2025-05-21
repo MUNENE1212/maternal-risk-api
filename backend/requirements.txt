@@ -12,4 +12,8 @@ motor
 imblearn
 python-decouple
 xgboost 
-
+python-jose
+jinja2
+africastalking
+passlib
+python-multipart

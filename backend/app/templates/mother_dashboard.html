@@ -183,11 +183,12 @@
                                 <circle class="progress-ring__circle" stroke="#3b82f6" cx="60" cy="60" r="54" fill="transparent" stroke-dasharray="339.3" stroke-dashoffset="101.8"/>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-3xl font-bold text-blue-600">28</span>
-                                <span class="text-gray-500 text-sm">out of 40 weeks</span>
+                                <span class="text-3xl font-bold text-blue-600">28/
+                                40</span>
+                                <span class="text-gray-500 text-sm">Weeks</span>
                             </div>
                         </div>
-                        <p class="text-gray-700 font-medium mt-2">12 weeks to go!</p>
+                        <p class="text-green-700 font-medium mt-2">12 weeks to go!</p>
                     </div>
                 </div>
             </div>
@@ -998,35 +999,142 @@
             <button class="mt-6 text-blue-500">View All Resources</button>
         </section>
     </main>
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Navigation System
     const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.section');
+    const views = document.querySelectorAll('.view');
+    
+    function switchView(targetId) {
+        views.forEach(view => view.classList.remove('active'));
+        const targetView = document.getElementById(targetId);
+        if(targetView) targetView.classList.add('active');
+    }
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = link.getAttribute('href').substring(1);
-
-            // Hide all sections
-            sections.forEach(section => {
-                section.classList.add('hidden');
-            });
-
-            // Show the target section
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-            }
-
-            // Update active link
-            navLinks.forEach(nav => {
-                nav.classList.remove('active');
-            });
+            navLinks.forEach(nav => nav.classList.remove('active'));
             link.classList.add('active');
+            switchView(targetId);
+        });
+    });
+
+    // Initialize first view
+    switchView('home');
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+
+    // Set initial dark mode state
+    if(localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // Refresh Data
+    document.querySelector('[href="#home"]').addEventListener('click', () => {
+        document.querySelector('#home .bg-blue-600').addEventListener('click', () => {
+            location.reload(); // Simple page reload for demonstration
+        });
+    });
+
+    // Schedule Appointment
+    document.querySelector('.bg-pink-50 button').addEventListener('click', () => {
+        // Replace with actual scheduling logic
+        window.alert('Appointment scheduling feature coming soon!');
+    });
+
+    // Update Profile
+    document.querySelector('#profile-analytics button').addEventListener('click', () => {
+        // Replace with actual profile update logic
+        window.alert('Profile update feature under development');
+    });
+
+    // View All Health Tips
+    document.querySelector('#home .bg-green-50 button').addEventListener('click', () => {
+        // Implement health tips expansion logic
+        window.alert('Loading full health tips...');
+    });
+
+    // Community Tabs
+    const communityTabs = document.querySelectorAll('.community-tab');
+    const communityContents = document.querySelectorAll('.community-content');
+    
+    communityTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            communityTabs.forEach(t => t.classList.remove('active'));
+            communityContents.forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(`${targetTab}-content`).classList.add('active');
+        });
+    });
+
+    // Initialize Charts (example for weight chart)
+    const weightCtx = document.getElementById('weightChart').getContext('2d');
+    new Chart(weightCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 24', 'Week 25', 'Week 26', 'Week 27', 'Week 28'],
+            datasets: [{
+                label: 'Weight (kg)',
+                data: [65.3, 66.0, 66.8, 67.5, 68.5],
+                borderColor: '#7c3aed',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Initialize Blood Pressure Chart
+    const bpCtx = document.getElementById('bpChart').getContext('2d');
+    new Chart(bpCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 24', 'Week 25', 'Week 26', 'Week 27', 'Week 28'],
+            datasets: [{
+                label: 'Systolic',
+                data: [118, 120, 122, 119, 120],
+                borderColor: '#ef4444',
+                tension: 0.4
+            },
+            {
+                label: 'Diastolic',
+                data: [78, 79, 80, 77, 80],
+                borderColor: '#f59e0b',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Add Event to Health Timeline
+    document.querySelector('#health-timeline button').addEventListener('click', () => {
+        // Implement event addition logic
+        window.alert('Event creation feature coming soon');
+    });
+
+    // Bookmark Functionality
+    document.querySelectorAll('.fa-bookmark').forEach(bookmark => {
+        bookmark.addEventListener('click', function() {
+            this.classList.toggle('fas');
+            this.classList.toggle('far');
+            this.classList.toggle('text-blue-500');
         });
     });
 });
-    </script>
+</script>
 </body>
 </html>

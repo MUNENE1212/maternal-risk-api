@@ -11,7 +11,6 @@ COPY requirements.txt .
 
 # 4. Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-RUN ls - al
 # 5. Copy the entire project
 COPY . .
 

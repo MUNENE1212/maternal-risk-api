@@ -1,10 +1,10 @@
 # app/db/database.py
-
 from motor.motor_asyncio import AsyncIOMotorClient
 from decouple import config
 
-MONGO_URI = config("MONGO_URI")
-MONGO_DB = config("MONGO_DB")
+# Use environment variables for flexibility
+MONGO_URI = config("MONGO_URI", default="mongodb://maternal_db:27017")  # Docker service name
+MONGO_DB = config("MONGO_DB", default="maternal_risk_db")
 
 client = AsyncIOMotorClient(MONGO_URI)
 db = client[MONGO_DB]

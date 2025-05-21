@@ -7,6 +7,9 @@ from app.routers.ussd_router import ussd_router
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from app.routers import admin_management_router
+
+
 app = FastAPI()
 
 templates = Jinja2Templates(directory="app/templates")
@@ -14,7 +17,7 @@ templates = Jinja2Templates(directory="app/templates")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:8000"],  
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,6 +35,7 @@ app.include_router(clinician_router.router)
 app.include_router(chv_router.router)
 app.include_router(auth_router.router, prefix="/auth")
 app.include_router(dashboard_router.router)
+app.include_router(admin_management_router.router)
 
 from app.routers.patient_router import patient_dashboard
 

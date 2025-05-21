@@ -639,7 +639,7 @@
     <div class="container">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h1>MamaRisk</h1>
+                <h1>MamaGuardian</h1>
                 <p>Maternal Health Dashboard</p>
             </div>
             <ul class="nav-menu">
@@ -807,58 +807,66 @@
         </div>
     </div>
 
-            <!-- Risk Assessment View -->
-            <div id="vitals-view" class="view">
-                <div class="header">
-                    <h2>Risk Assessment</h2>
+<!-- Risk Assessment View with Enhanced Result Display and Historical Predictions -->
+<div id="vitals-view" class="view">
+    <div class="header">
+        <h2>Risk Assessment</h2>
+    </div>
+    
+    <div class="card">
+        <form id="risk-assessment-form">
+            <div class="form-group">
+                <label for="national-id">National ID</label>
+                <input type="text" id="national-id" class="form-control" required>
+            </div>
+            
+            <div class="row">
+                <div class="col form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" class="form-control" required>
                 </div>
-                
-                <div class="card">
-                    <form id="risk-assessment-form">
-                        <div class="form-group">
-                            <label for="national-id">National ID</label>
-                            <input type="text" id="national-id" class="form-control" required>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col form-group">
-                                <label for="age">Age</label>
-                                <input type="number" id="age" class="form-control" required>
-                            </div>
-                            <div class="col form-group">
-                                <label for="systolic-bp">Systolic BP (mmHg)</label>
-                                <input type="number" id="systolic-bp" class="form-control" required>
-                            </div>
-                            <div class="col form-group">
-                                <label for="diastolic-bp">Diastolic BP (mmHg)</label>
-                                <input type="number" id="diastolic-bp" class="form-control" required>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col form-group">
-                                <label for="blood-sugar">Blood Sugar (mmol/L)</label>
-                                <input type="number" id="blood-sugar" class="form-control" step="0.1" required>
-                            </div>
-                            <div class="col form-group">
-                                <label for="body-temp">Body Temperature (°F)</label>
-                                <input type="number" id="body-temp" class="form-control" step="0.1" required>
-                            </div>
-                            <div class="col form-group">
-                                <label for="heart-rate">Heart Rate (bpm)</label>
-                                <input type="number" id="heart-rate" class="form-control" required>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-calculator"></i> Predict Risk</button>
-                    </form>
+                <div class="col form-group">
+                    <label for="systolic-bp">Systolic BP (mmHg)</label>
+                    <input type="number" id="systolic-bp" class="form-control" required>
                 </div>
-                
-                <div id="risk-result" class="card" style="display: none;">
-                    <!-- Risk result content -->
+                <div class="col form-group">
+                    <label for="diastolic-bp">Diastolic BP (mmHg)</label>
+                    <input type="number" id="diastolic-bp" class="form-control" required>
                 </div>
             </div>
-
+            
+            <div class="row">
+                <div class="col form-group">
+                    <label for="blood-sugar">Blood Sugar (mmol/L)</label>
+                    <input type="number" id="blood-sugar" class="form-control" step="0.1" required>
+                </div>
+                <div class="col form-group">
+                    <label for="body-temp">Body Temperature (°F)</label>
+                    <input type="number" id="body-temp" class="form-control" step="0.1" required>
+                </div>
+                <div class="col form-group">
+                    <label for="heart-rate">Heart Rate (bpm)</label>
+                    <input type="number" id="heart-rate" class="form-control" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary"><i class="fas fa-calculator"></i> Predict Risk</button>
+        </form>
+    </div>
+    
+    <!-- Enhanced Risk Result Card -->
+    <div id="risk-result" class="card" style="display: none;">
+        <!-- This content will be dynamically filled by JavaScript -->
+    </div>
+    
+    <!-- New Historical Predictions Card -->
+    <div id="prediction-history" class="card" style="display: none;">
+        <h3>Previous Risk Assessments</h3>
+        <div id="history-content">
+            <!-- This content will be dynamically filled by JavaScript -->
+        </div>
+    </div>
+</div>
             <!-- Antenatal Visits View -->
             <div id="antenatal-view" class="view">
                 <div class="header">

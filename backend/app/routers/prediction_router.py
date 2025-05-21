@@ -68,7 +68,7 @@ async def predict(input_data: PredictionInput):
 
         # Build prediction record (with input vitals)
         prediction_entry = PredictionHistoryItem(
-            risk=prediction_label,
+            prediction=prediction_label,
             confidence=confidence,
             model_used="xgboost",
             predicted_at=timestamp,

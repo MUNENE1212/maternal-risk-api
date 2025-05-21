@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  maternal_db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - maternal_network
+    volumes:
+      - mongo_data:/data/db
+
+  maternal_app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env  # This allows sensitive variables to be managed cleanly
+    environment:
+      - MONGO_URI=mongodb://maternal_db:27017
+      - MONGO_DB=maternal_risk_db
+    depends_on:
+      - maternal_db
+    networks:
+      - maternal_network
+
+volumes:
+  mongo_data:
+
+networks:
+  maternal_network:
+    driver: bridge
+
